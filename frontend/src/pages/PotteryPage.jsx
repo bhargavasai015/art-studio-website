@@ -52,7 +52,7 @@ export default function PotteryPage({ onOpenAuth, onNavigateToRequests }) {
   const selectedItem = items.find((i) => i.id === selectedItemId);
   const selectedGlaze = glazes.find((g) => g.id === selectedGlazeId);
 
-  const estimatedTotal = selectedItem ? (selectedItem.base_price * quantity).toFixed(2) : '0.00';
+  const estimatedTotal = selectedItem ? (selectedItem.base_price * quantity) : 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -174,7 +174,7 @@ export default function PotteryPage({ onOpenAuth, onNavigateToRequests }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderTop: '1px solid var(--color-border)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
                 <span style={{ fontWeight: 600 }}>Estimated Cost:</span>
                 <strong style={{ color: 'var(--color-primary)', fontSize: '1.15rem' }}>
-                  ${estimatedTotal}
+                  ₹{Number(estimatedTotal).toLocaleString('en-IN')}
                 </strong>
               </div>
             </div>
@@ -261,7 +261,7 @@ export default function PotteryPage({ onOpenAuth, onNavigateToRequests }) {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.35rem' }}>
                           <span style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>{item.name}</span>
                           <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '0.9rem' }}>
-                            ${item.base_price.toFixed(2)}
+                            ₹{Number(item.base_price).toLocaleString('en-IN')}
                           </span>
                         </div>
                         <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
@@ -385,11 +385,11 @@ export default function PotteryPage({ onOpenAuth, onNavigateToRequests }) {
                     Estimated Commission Total
                   </span>
                   <div style={{ fontSize: '0.8rem', color: '#a16207', marginTop: '0.2rem' }}>
-                    {quantity} × {selectedItem?.name} (${selectedItem?.base_price.toFixed(2)}/ea)
+                    {quantity} × {selectedItem?.name} (₹{selectedItem?.base_price}/ea)
                   </div>
                 </div>
                 <div style={{ fontSize: '1.85rem', fontWeight: 700, color: '#78350f' }}>
-                  ${estimatedTotal}
+                  ₹{Number(estimatedTotal).toLocaleString('en-IN')}
                 </div>
               </div>
 

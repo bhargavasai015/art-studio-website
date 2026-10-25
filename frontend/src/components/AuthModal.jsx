@@ -35,9 +35,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
 
   const fillQuickCredentials = (role) => {
     setError('');
-    if (role === 'admin') {
-      setEmail('admin@artstudio.com');
-      setPassword('AdminPassword123!');
+    if (role === 'admin' || role === 'studio') {
+      setEmail('studio@artstudio.in');
+      setPassword('Studio@123');
       setMode('login');
     } else {
       setEmail('customer@example.com');

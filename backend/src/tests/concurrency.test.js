@@ -17,8 +17,8 @@ describe('Concurrency & Race Condition Safety Tests', () => {
   }
 
   test('Concurrent Painting Purchase: exactly one succeeds (201) and one fails (409)', async () => {
-    // Painting #4 ("Terra Incognita", $890.00) is available
-    const paintingId = 4;
+    // Painting 'p-003' ("Tanjore Lakshmi with Gold Leaf", ₹24,500) is available
+    const paintingId = 'p-003';
 
     // Both customer 1 and customer 2 fire purchase requests simultaneously
     const p1 = request

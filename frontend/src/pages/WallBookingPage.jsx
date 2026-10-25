@@ -8,7 +8,7 @@ import { Calendar, Ruler, MapPin, DollarSign, CheckCircle, AlertCircle, Info, Sp
 export default function WallBookingPage({ onOpenAuth, onNavigateToBookings }) {
   const { isAuthenticated, isCustomer, isAdmin } = useAuth();
 
-  const [ratePerSqFt, setRatePerSqFt] = useState(15.0);
+  const [ratePerSqFt, setRatePerSqFt] = useState(150.0);
   const [bookedDates, setBookedDates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -168,12 +168,12 @@ export default function WallBookingPage({ onOpenAuth, onNavigateToBookings }) {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0' }}>
                 <span style={{ color: 'var(--color-text-muted)' }}>Rate:</span>
-                <span>${submittedBooking.rate_per_sqft}/sq ft</span>
+                <span>₹{submittedBooking.rate_per_sqft}/sq ft</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderTop: '1px solid var(--color-border)', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
                 <span style={{ fontWeight: 600 }}>Total Price:</span>
                 <strong style={{ color: 'var(--color-primary)', fontSize: '1.15rem' }}>
-                  ${submittedBooking.total_price.toFixed(2)}
+                  ₹{Number(submittedBooking.total_price).toLocaleString('en-IN')}
                 </strong>
               </div>
             </div>
@@ -220,7 +220,7 @@ export default function WallBookingPage({ onOpenAuth, onNavigateToBookings }) {
               </div>
               <div>
                 <strong>💰 Studio Rate:</strong>
-                <p style={{ color: 'var(--color-text-muted)', marginTop: '0.2rem' }}>${ratePerSqFt.toFixed(2)} / sq ft</p>
+                <p style={{ color: 'var(--color-text-muted)', marginTop: '0.2rem' }}>₹{ratePerSqFt.toFixed(0)} / sq ft</p>
               </div>
               <div>
                 <strong>⏱️ Cancellation:</strong>
@@ -324,11 +324,11 @@ export default function WallBookingPage({ onOpenAuth, onNavigateToBookings }) {
                     Calculated Commission Price
                   </span>
                   <div style={{ fontSize: '0.8rem', color: '#a16207', marginTop: '0.2rem' }}>
-                    {wallSize} sq ft × ${ratePerSqFt.toFixed(2)}/sq ft
+                    {wallSize} sq ft × ₹{ratePerSqFt}/sq ft
                   </div>
                 </div>
                 <div style={{ fontSize: '1.85rem', fontWeight: 700, color: '#78350f' }}>
-                  ${calculateTotal()}
+                  ₹{Number(calculateTotal()).toLocaleString('en-IN')}
                 </div>
               </div>
 

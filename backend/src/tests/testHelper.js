@@ -12,8 +12,8 @@ export async function getAuthTokens() {
   resetTestDb();
 
   const adminRes = await request.post('/api/auth/login').send({
-    email: 'admin@artstudio.com',
-    password: 'AdminPassword123!'
+    email: 'studio@artstudio.in',
+    password: 'Studio@123'
   });
 
   const customer1Res = await request.post('/api/auth/login').send({

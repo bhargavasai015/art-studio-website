@@ -353,7 +353,7 @@ export default function GalleryPage({ onOpenAuth, onNavigateToOrders }) {
                     <div>
                       <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', textTransform: 'uppercase' }}>Price</span>
                       <span style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-                        ${painting.price.toFixed(2)}
+                        ₹{Number(painting.price).toLocaleString('en-IN')}
                       </span>
                     </div>
 
@@ -492,7 +492,7 @@ export default function GalleryPage({ onOpenAuth, onNavigateToOrders }) {
                       <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem' }}>{purchasingPainting.title}</h4>
                       <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.35rem' }}>{purchasingPainting.artist}</div>
                       <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-                        ${purchasingPainting.price.toFixed(2)}
+                        ₹{Number(purchasingPainting.price).toLocaleString('en-IN')}
                       </div>
                     </div>
                   </div>
@@ -577,16 +577,16 @@ export default function GalleryPage({ onOpenAuth, onNavigateToOrders }) {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Price ($ USD) *</label>
+                  <label className="form-label">Price (₹ INR) *</label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="1"
                     required
                     className="form-input"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="450.00"
+                    placeholder="8500"
                   />
                 </div>
               </div>

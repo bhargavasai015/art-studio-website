@@ -15,11 +15,11 @@ describe('Custom Pottery Requests Tests', () => {
     return d.toISOString().split('T')[0];
   }
 
-  test('Public catalog options returns pottery items and glazes', async () => {
+  test('Public catalog options returns pottery items and glazes from seedData', async () => {
     const res = await request.get('/api/pottery/options').expect(200);
     assert.ok(Array.isArray(res.body.items));
     assert.ok(Array.isArray(res.body.glazes));
-    assert.ok(res.body.items.length >= 6);
+    assert.ok(res.body.items.length >= 5);
     assert.ok(res.body.glazes.length >= 6);
   });
 
@@ -30,11 +30,11 @@ describe('Custom Pottery Requests Tests', () => {
       .post('/api/pottery')
       .set('Authorization', `Bearer ${tokens.customer1Token}`)
       .send({
-        item_id: 1, // Fluted Vase
-        glaze_id: 1, // Cobalt Indigo
+        item_id: 'i-01', // Kulhad (clay cup)
+        glaze_id: 'g-01', // Kumkum Red
         quantity: 3,
         needed_by: neededDate,
-        notes: 'Slightly taller neck'
+        notes: 'Slightly wider lip'
       })
       .expect(201);
 
@@ -50,8 +50,8 @@ describe('Custom Pottery Requests Tests', () => {
       .post('/api/pottery')
       .set('Authorization', `Bearer ${tokens.customer1Token}`)
       .send({
-        item_id: 1,
-        glaze_id: 1,
+        item_id: 'i-01',
+        glaze_id: 'g-01',
         quantity: 2,
         needed_by: tooSoonDate
       })
@@ -66,8 +66,8 @@ describe('Custom Pottery Requests Tests', () => {
       .post('/api/pottery')
       .set('Authorization', `Bearer ${tokens.customer1Token}`)
       .send({
-        item_id: 1,
-        glaze_id: 1,
+        item_id: 'i-01',
+        glaze_id: 'g-01',
         quantity: 0,
         needed_by: getOffsetDate(20)
       })
@@ -78,8 +78,8 @@ describe('Custom Pottery Requests Tests', () => {
       .post('/api/pottery')
       .set('Authorization', `Bearer ${tokens.customer1Token}`)
       .send({
-        item_id: 1,
-        glaze_id: 1,
+        item_id: 'i-01',
+        glaze_id: 'g-01',
         quantity: 13,
         needed_by: getOffsetDate(20)
       })
@@ -141,8 +141,8 @@ describe('Custom Pottery Requests Tests', () => {
       .post('/api/pottery')
       .set('Authorization', `Bearer ${tokens.customer1Token}`)
       .send({
-        item_id: 2,
-        glaze_id: 2,
+        item_id: 'i-02',
+        glaze_id: 'g-02',
         quantity: 1,
         needed_by: getOffsetDate(18)
       })
@@ -171,8 +171,8 @@ describe('Custom Pottery Requests Tests', () => {
       .post('/api/pottery')
       .set('Authorization', `Bearer ${tokens.adminToken}`)
       .send({
-        item_id: 1,
-        glaze_id: 1,
+        item_id: 'i-01',
+        glaze_id: 'g-01',
         quantity: 2,
         needed_by: getOffsetDate(20)
       })

@@ -2,18 +2,18 @@
 
 A full-stack, responsive web application for an art studio featuring **one-of-a-kind painting sales**, **wall mural bookings**, and **custom wheel-thrown pottery commissions**, backed by strict **Role-Based Access Control (RBAC)**, **atomic concurrency protection**, and **persistent SQLite storage**.
 
-Built for the **Google Developer Groups on Campus (GDGC)** Web Development Student Chapter assignment.
+Built for the **Google Developer Groups on Campus (GDGC)** Web Development Student Chapter assignment, configured with the official **`seedData.zip`** and **Indian Rupee (₹ / INR)** pricing.
 
 ---
 
 ## 🎨 System Highlights
 
-- **Original Paintings Gallery**: Each painting is one-of-a-kind. When bought, its status atomically changes to `sold`. If the buyer cancels their order, the artwork is immediately restored to `available`.
-- **Wall Mural Commissions**: Interactive date selection enforcing the 7-to-90-day booking window, wall surface area validation (10 to 500 sq ft), dynamic studio pricing based on seed rate ($15.00/sq ft), duplicate date prevention, and customer cancellation up to 3 days before the date.
-- **Custom Pottery Requests**: Catalog choice from 6 artisanal vessel silhouettes and 6 studio glazes, order quantity limits (1 to 12 pieces), production lead time validation (≥ 14 days away), and customer editing/cancellation restricted to the `requested` status.
+- **Original Folk Art Gallery**: 12 curated traditional Indian folk artworks from `seed.json` (Madhubani, Warli, Tanjore, Pattachitra, Kalamkari, Gond, Cheriyal, Rajasthani Miniature, Pichwai, Nirmal, Kerala Mural, and Varanasi Ghats). Each painting is one-of-a-kind. When bought, its status atomically changes to `sold`. If the buyer cancels their order, the artwork is immediately restored to `available`.
+- **Wall Mural Commissions**: Interactive date selection enforcing the 7-to-90-day booking window, wall surface area validation (10 to 500 sq ft), dynamic studio pricing based on the official seed rate (**₹150 / sq ft**), duplicate date prevention, and customer cancellation up to 3 days before the date.
+- **Custom Pottery Requests**: Catalog choice from 5 authentic artisanal vessel silhouettes (Kulhad, Surahi, Matka, Diya set, Gamla) and 6 traditional glazes (Kumkum Red, Haldi Yellow, Mehendi Green, Indigo Blue, Sandalwood Beige, Charcoal Black), order quantity limits (1 to 12 pieces), production lead time validation (≥ 14 days away), and customer editing/cancellation restricted to the `requested` status.
 - **Server-Enforced RBAC**:
   - `401 Unauthorized` for missing/invalid authentication.
-  - `403 Forbidden` for wrong-role access (e.g., customers attempting admin endpoints, or admins attempting to place customer orders).
+  - `403 Forbidden` for wrong-role access (e.g., customers attempting admin/studio endpoints, or studio admins attempting to place customer orders).
   - `404 Not Found` when a customer attempts to query another customer's record (preventing ID enumeration).
   - Public registration strictly provisions `customer` accounts; studio admin accounts can only be provisioned server-side.
 - **Robust Concurrency**: SQLite transactions (`BEGIN IMMEDIATE`) and database partial unique indexes prevent double-booking or simultaneous multi-customer purchases.
@@ -25,7 +25,7 @@ Built for the **Google Developer Groups on Campus (GDGC)** Web Development Stude
 
 | Layer | Technologies |
 |---|---|
-| **Frontend** | React 18, Vite 6, Lucide Icons, Pure Responsive CSS |
+| **Frontend** | React 18, Vite 6, Lucide Icons, Pure Responsive CSS (handles long titles & descriptions) |
 | **Backend** | Node.js (v20+ / v24), Express 4, JWT, bcryptjs |
 | **Database** | SQLite via native Node standard library (`node:sqlite` / `DatabaseSync`) with WAL mode |
 | **Testing** | Node native test runner (`node:test`), Supertest |
@@ -63,7 +63,7 @@ cd ..
 ```
 
 ### 4. Initialize and Seed Database
-The backend includes a dedicated seeding script that sets up studio rates, pottery catalog items, glaze palettes, initial paintings, and testing accounts:
+The backend includes a dedicated seeding script that sets up studio rates (**₹150/sq ft**), pottery catalog items, glaze palettes, all 12 paintings from `seed.json`, and testing accounts:
 ```bash
 cd backend
 npm run seed
@@ -108,13 +108,13 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 
 ## 🔑 Provisioned Test Credentials
 
-The database is pre-seeded with verified test accounts. You can also use the **1-Click Fill** buttons inside the application's Sign In modal:
+The database is pre-seeded with verified test accounts matching the official `seed.json`. You can also use the **1-Click Fill** buttons inside the application's Sign In modal:
 
 | Role | Email | Password | Permissions |
 |---|---|---|---|
-| **Customer** | `customer@example.com` | `CustomerPassword123!` | Buy paintings, book murals, request pottery, cancel own records |
+| **Studio Lead** | `studio@artstudio.in` | `Studio@123` | Official seedData studio account: add/edit paintings, confirm/decline bookings, accept/decline pottery |
+| **Customer** | `customer@example.com` | `CustomerPassword123!` | Buy paintings in ₹, book murals, request pottery, cancel own records |
 | **Customer 2** | `bob@example.com` | `BobPassword123!` | Used for cross-user permission and concurrency tests |
-| **Studio Admin** | `admin@artstudio.com` | `AdminPassword123!` | Add/edit paintings, confirm/decline bookings, accept/decline pottery |
 
 ---
 
@@ -129,10 +129,10 @@ npm test
 
 ### Test Suite Summary:
 - **`auth.test.js`** (7 tests): Registration role enforcement, invalid email/passwords, password hashing verification, 401 unauthenticated, 401 invalid tokens.
-- **`paintings.test.js`** (6 tests): Public browsing, admin creation, customer forbidden from creating (403), admin editing available paintings, refusal to edit sold paintings (400), customer forbidden from editing (403).
+- **`paintings.test.js`** (6 tests): Public browsing of all 12 paintings, admin creation, customer forbidden from creating (403), admin editing available paintings, refusal to edit sold paintings (400), customer forbidden from editing (403).
 - **`orders.test.js`** (8 tests): Atomic painting purchase, admin purchase refusal (403), double-purchase conflict (409), customer view isolation, admin view all, cross-customer order isolation (404), order cancellation with inventory restoration.
-- **`bookings.test.js`** (12 tests): 7-to-90-day boundary validation, 10-to-500 sq ft validation, price calculation ($15/sq ft), duplicate date refusal (409), admin confirm/decline, cancellation at least 3 days before date, refusal within 3 days (400), cross-customer isolation (404), admin booking refusal (403).
-- **`pottery.test.js`** (11 tests): Catalog options retrieval, custom request creation, needed-by date validation (≥ 14 days), quantity limits (1-12), edit while requested, admin accept/decline, refusal to edit/cancel accepted commissions (400), cross-customer isolation (404).
+- **`bookings.test.js`** (12 tests): 7-to-90-day boundary validation, 10-to-500 sq ft validation, price calculation (₹150/sq ft), duplicate date refusal (409), admin confirm/decline, cancellation at least 3 days before date, refusal within 3 days (400), cross-customer isolation (404), admin booking refusal (403).
+- **`pottery.test.js`** (11 tests): Catalog options retrieval (Kulhad, Surahi, etc.), custom request creation, needed-by date validation (≥ 14 days), quantity limits (1-12), edit while requested, admin accept/decline, refusal to edit/cancel accepted commissions (400), cross-customer isolation (404).
 - **`concurrency.test.js`** (2 tests): Simultaneous concurrent purchase of the same painting (exactly one 201, one 409), simultaneous concurrent booking of the same date (exactly one 201, one 409).
 
 **Test Result:** `46 passed, 0 failed` across 6 test suites.
@@ -143,7 +143,7 @@ npm test
 
 ```
 art-studio-website/
-├── .env.example            # Environment variables template
+├── .env.example            # Environment variables template (INR currency, ₹150 rate)
 ├── .gitignore              # Git exclusions for dependencies, secrets, databases
 ├── README.md               # Setup and project documentation
 ├── DESIGN.md               # Architectural answers for evaluation
@@ -152,15 +152,17 @@ art-studio-website/
 │
 ├── backend/
 │   ├── package.json
+│   ├── public/images/      # 12 authentic folk art painting images from seedData
 │   ├── src/
-│   │   ├── config.js       # Environment configuration and defaults
-│   │   ├── server.js       # Express application entrypoint and static server
+│   │   ├── config.js       # Environment configuration (PORT, INR currency, rate)
+│   │   ├── server.js       # Express application entrypoint and static image server
 │   │   ├── db/
 │   │   │   ├── schema.sql  # Relational SQLite schema with indexes and constraints
 │   │   │   ├── database.js # SQLite connection with WAL mode and transaction helper
-│   │   │   └── seed.js     # Database initialization and demo dataset
+│   │   │   ├── seed.json   # Official seed dataset from assignment
+│   │   │   └── seed.js     # Database initialization and seeding script
 │   │   ├── middleware/
-│   │   │   └── auth.js     # JWT verification and RBAC enforcement
+│   │   │   └── auth.js     # JWT verification and RBAC enforcement (studio & customer)
 │   │   ├── routes/
 │   │   │   ├── auth.js     # User registration, login, and profile
 │   │   │   ├── paintings.js# Gallery browse, add, and edit
@@ -196,18 +198,9 @@ art-studio-website/
         │   ├── EmptyState.jsx      # Empty collection visualizer
         │   └── ErrorMessage.jsx    # User-friendly error alert box
         └── pages/
-            ├── GalleryPage.jsx        # Painting gallery and purchasing modal
-            ├── WallBookingPage.jsx    # Wall mural calendar and price calculator
-            ├── PotteryPage.jsx        # Custom pottery commissioning form
+            ├── GalleryPage.jsx        # Painting gallery and purchasing modal in ₹
+            ├── WallBookingPage.jsx    # Wall mural calendar and ₹150/sq ft calculator
+            ├── PotteryPage.jsx        # Custom pottery commissioning form in ₹
             ├── CustomerDashboard.jsx  # Customer orders, bookings, and pottery
             └── AdminDashboard.jsx     # Studio staff management console
 ```
-
----
-
-## 🔒 Security Summary
-
-1. **Password Safety**: Handled exclusively using bcryptjs with salted hashes. Cleartext passwords are never stored or logged.
-2. **Access Control**: Roles (`customer` vs `admin`) are strictly enforced by backend middleware on every API call. The client UI's button visibility is purely cosmetic.
-3. **Information Disclosure Prevention**: Cross-user record lookups by customers strictly return `404 Not Found` rather than `403 Forbidden`, preventing attackers from enumerating valid IDs.
-4. **Data Validation**: Strict boundary checks for dates (7-90 days, 14+ days, 3-day cancellation rule) and wall sizes (10-500 sq ft) are executed on the server.

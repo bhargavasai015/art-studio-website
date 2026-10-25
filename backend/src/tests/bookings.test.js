@@ -16,7 +16,7 @@ describe('Wall-Painting Bookings Tests', () => {
     return d.toISOString().split('T')[0];
   }
 
-  test('Customer successfully books wall date between 7 and 90 days with correct rate calculation', async () => {
+  test('Customer successfully books wall date between 7 and 90 days with correct rate calculation (₹150/sq ft)', async () => {
     const targetDate = getOffsetDate(15);
     const wallSize = 100;
 
@@ -26,14 +26,14 @@ describe('Wall-Painting Bookings Tests', () => {
       .send({
         booking_date: targetDate,
         wall_size: wallSize,
-        address: '100 Sunset Boulevard, Los Angeles, CA'
+        address: 'Banjara Hills, Road No. 12, Hyderabad'
       })
       .expect(201);
 
     assert.equal(res.body.booking.booking_date, targetDate);
     assert.equal(res.body.booking.wall_size, 100);
-    assert.equal(res.body.booking.rate_per_sqft, 15.0);
-    assert.equal(res.body.booking.total_price, 1500.0);
+    assert.equal(res.body.booking.rate_per_sqft, 150.0);
+    assert.equal(res.body.booking.total_price, 15000.0); // 100 * 150
     assert.equal(res.body.booking.status, 'requested');
   });
 
@@ -46,7 +46,7 @@ describe('Wall-Painting Bookings Tests', () => {
       .send({
         booking_date: tooSoonDate,
         wall_size: 50,
-        address: '100 Sunset Boulevard'
+        address: 'Banjara Hills'
       })
       .expect(400);
 
@@ -62,7 +62,7 @@ describe('Wall-Painting Bookings Tests', () => {
       .send({
         booking_date: tooFarDate,
         wall_size: 50,
-        address: '100 Sunset Boulevard'
+        address: 'Banjara Hills'
       })
       .expect(400);
 
@@ -76,7 +76,7 @@ describe('Wall-Painting Bookings Tests', () => {
       .send({
         booking_date: getOffsetDate(14),
         wall_size: 9,
-        address: '100 Sunset Boulevard'
+        address: 'Banjara Hills'
       })
       .expect(400);
   });
@@ -88,7 +88,7 @@ describe('Wall-Painting Bookings Tests', () => {
       .send({
         booking_date: getOffsetDate(14),
         wall_size: 505,
-        address: '100 Sunset Boulevard'
+        address: 'Banjara Hills'
       })
       .expect(400);
   });
@@ -176,7 +176,7 @@ describe('Wall-Painting Bookings Tests', () => {
     const twoDaysDate = getOffsetDate(2);
     const insertStmt = db.prepare(`
       INSERT INTO wall_bookings (customer_id, booking_date, wall_size, rate_per_sqft, total_price, address, status)
-      VALUES (?, ?, 50, 15.0, 750.0, 'Late Address', 'confirmed')
+      VALUES (?, ?, 50, 150.0, 7500.0, 'Late Address', 'confirmed')
     `);
     const insertRes = insertStmt.run(tokens.customer1User.id, twoDaysDate);
     const lateBookingId = Number(insertRes.lastInsertRowid);

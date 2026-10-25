@@ -248,8 +248,8 @@ export default function AdminDashboard({ onNavigateToGallery }) {
                               <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{booking.customer_email}</div>
                             </td>
                             <td><strong>{booking.booking_date}</strong></td>
-                            <td>{booking.wall_size} sq ft @ ${booking.rate_per_sqft}/sq ft</td>
-                            <td><strong style={{ color: 'var(--color-primary)' }}>${booking.total_price.toFixed(2)}</strong></td>
+                            <td>{booking.wall_size} sq ft @ ₹{booking.rate_per_sqft}/sq ft</td>
+                            <td><strong style={{ color: 'var(--color-primary)' }}>₹{Number(booking.total_price).toLocaleString('en-IN')}</strong></td>
                             <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={booking.address}>
                               {booking.address}
                             </td>
@@ -419,7 +419,7 @@ export default function AdminDashboard({ onNavigateToGallery }) {
                               </div>
                             </div>
                           </td>
-                          <td><strong style={{ color: 'var(--color-primary)' }}>${order.price_paid.toFixed(2)}</strong></td>
+                          <td><strong style={{ color: 'var(--color-primary)' }}>₹{Number(order.price_paid).toLocaleString('en-IN')}</strong></td>
                           <td><StatusBadge status={order.status} /></td>
                           <td>{order.created_at}</td>
                         </tr>

@@ -31,7 +31,13 @@ export function requireRole(...allowedRoles) {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required.' });
     }
-    if (!allowedRoles.includes(req.user.role)) {
+    const userRole = req.user.role;
+    // 'studio' and 'admin' are synonyms for the studio administration role
+    const hasRole = allowedRoles.includes(userRole) ||
+      (allowedRoles.includes('admin') && userRole === 'studio') ||
+      (allowedRoles.includes('studio') && userRole === 'admin');
+
+    if (!hasRole) {
       return res.status(403).json({ error: 'Access forbidden: Insufficient permissions for this action.' });
     }
     next();

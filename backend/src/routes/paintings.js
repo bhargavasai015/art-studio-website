@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
     params.push(status);
   }
 
-  query += ' ORDER BY id DESC';
+  query += ' ORDER BY id ASC';
 
   const paintings = db.prepare(query).all(...params);
   res.json({ paintings });
@@ -23,8 +23,8 @@ router.get('/', (req, res) => {
 
 // GET /api/paintings/:id - Get a single painting
 router.get('/:id', (req, res) => {
-  const paintingId = parseInt(req.params.id, 10);
-  if (isNaN(paintingId)) {
+  const paintingId = req.params.id;
+  if (!paintingId) {
     return res.status(400).json({ error: 'Invalid painting ID.' });
   }
 
@@ -36,9 +36,9 @@ router.get('/:id', (req, res) => {
   res.json({ painting });
 });
 
-// POST /api/paintings - Studio adds a new painting (Admin only)
+// POST /api/paintings - Studio adds a new painting (Admin/Studio only)
 router.post('/', authenticateToken, requireRole('admin'), (req, res) => {
-  const { title, artist, description, medium, dimensions, price, image_url } = req.body;
+  const { id, title, artist, description, medium, dimensions, price, image_url } = req.body;
 
   if (!title || !artist || price === undefined || price === null) {
     return res.status(400).json({ error: 'Title, artist, and price are required.' });
@@ -49,29 +49,32 @@ router.post('/', authenticateToken, requireRole('admin'), (req, res) => {
     return res.status(400).json({ error: 'Price must be a positive number.' });
   }
 
+  const paintingId = id ? id.trim() : `p-${Date.now().toString().slice(-4)}`;
+
   const insertStmt = db.prepare(`
-    INSERT INTO paintings (title, artist, description, medium, dimensions, price, image_url, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 'available')
+    INSERT INTO paintings (id, title, artist, description, medium, dimensions, price, image_url, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available')
   `);
 
-  const result = insertStmt.run(
+  insertStmt.run(
+    paintingId,
     title.trim(),
     artist.trim(),
     description ? description.trim() : null,
-    medium ? medium.trim() : 'Mixed Media',
-    dimensions ? dimensions.trim() : 'Custom',
+    medium ? medium.trim() : 'Traditional Pigments on Canvas',
+    dimensions ? dimensions.trim() : '45 x 60 cm',
     parsedPrice,
-    image_url ? image_url.trim() : 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80'
+    image_url ? image_url.trim() : '/images/p-001.jpg'
   );
 
-  const newPainting = db.prepare('SELECT * FROM paintings WHERE id = ?').get(result.lastInsertRowid);
+  const newPainting = db.prepare('SELECT * FROM paintings WHERE id = ?').get(paintingId);
   res.status(201).json({ message: 'Painting added successfully.', painting: newPainting });
 });
 
-// PUT /api/paintings/:id - Studio edits a painting (Admin only, ONLY while available)
+// PUT /api/paintings/:id - Studio edits a painting (Admin/Studio only, ONLY while available)
 router.put('/:id', authenticateToken, requireRole('admin'), (req, res) => {
-  const paintingId = parseInt(req.params.id, 10);
-  if (isNaN(paintingId)) {
+  const paintingId = req.params.id;
+  if (!paintingId) {
     return res.status(400).json({ error: 'Invalid painting ID.' });
   }
 

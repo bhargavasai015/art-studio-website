@@ -12,7 +12,7 @@ describe('Paintings Gallery & Permissions Tests', () => {
   test('Public can browse paintings collection', async () => {
     const res = await request.get('/api/paintings').expect(200);
     assert.ok(Array.isArray(res.body.paintings));
-    assert.ok(res.body.paintings.length >= 8);
+    assert.ok(res.body.paintings.length >= 12, 'Must contain all 12 paintings from seedData');
   });
 
   test('Admin can add a new painting to the gallery', async () => {
@@ -20,17 +20,18 @@ describe('Paintings Gallery & Permissions Tests', () => {
       .post('/api/paintings')
       .set('Authorization', `Bearer ${tokens.adminToken}`)
       .send({
-        title: 'Autumn Mirage',
-        artist: 'Elena Rostova',
-        medium: 'Oil on Canvas',
-        dimensions: '30" x 40"',
-        price: 520.0,
-        description: 'Warm study of light through oak leaves.'
+        title: 'Autumn Mirage in Ranthambore',
+        artist: 'Meera Kumari',
+        medium: 'Natural Pigments on Tussar Silk',
+        dimensions: '50 x 70 cm',
+        price: 8500.0,
+        description: 'Vibrant study of forest deer under golden sunlight.'
       })
       .expect(201);
 
-    assert.equal(res.body.painting.title, 'Autumn Mirage');
+    assert.equal(res.body.painting.title, 'Autumn Mirage in Ranthambore');
     assert.equal(res.body.painting.status, 'available');
+    assert.equal(res.body.painting.price, 8500.0);
   });
 
   test('Customer is refused from adding a painting (403)', async () => {
@@ -40,30 +41,30 @@ describe('Paintings Gallery & Permissions Tests', () => {
       .send({
         title: 'Unauthorized Painting',
         artist: 'Customer',
-        price: 100
+        price: 1500
       })
       .expect(403);
   });
 
   test('Admin can edit an available painting', async () => {
-    // Painting #1 is available
+    // Painting 'p-001' is available in seed data (Madhubani Peacock Garden)
     const res = await request
-      .put('/api/paintings/1')
+      .put('/api/paintings/p-001')
       .set('Authorization', `Bearer ${tokens.adminToken}`)
       .send({
-        title: 'Echoes of the Mediterranean (Updated)',
-        price: 680.0
+        title: 'Madhubani Peacock Garden (Master Edition)',
+        price: 7200.0
       })
       .expect(200);
 
-    assert.equal(res.body.painting.title, 'Echoes of the Mediterranean (Updated)');
-    assert.equal(res.body.painting.price, 680.0);
+    assert.equal(res.body.painting.title, 'Madhubani Peacock Garden (Master Edition)');
+    assert.equal(res.body.painting.price, 7200.0);
   });
 
   test('Admin cannot edit a sold painting (400)', async () => {
-    // Painting #8 was seeded as sold
+    // Painting 'p-004' is seeded as sold in seed.json
     const res = await request
-      .put('/api/paintings/8')
+      .put('/api/paintings/p-004')
       .set('Authorization', `Bearer ${tokens.adminToken}`)
       .send({
         title: 'Attempt To Edit Sold Painting'
@@ -75,7 +76,7 @@ describe('Paintings Gallery & Permissions Tests', () => {
 
   test('Customer is refused from editing a painting (403)', async () => {
     await request
-      .put('/api/paintings/1')
+      .put('/api/paintings/p-001')
       .set('Authorization', `Bearer ${tokens.customer1Token}`)
       .send({
         title: 'Customer Edit Attempt'

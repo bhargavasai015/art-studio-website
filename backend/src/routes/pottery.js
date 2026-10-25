@@ -25,7 +25,7 @@ router.get('/options', (req, res) => {
 });
 
 // GET /api/pottery - List pottery requests
-// Customer: only what they own. Admin: all requests.
+// Customer: only what they own. Admin/Studio: all requests.
 router.get('/', authenticateToken, (req, res) => {
   let query = `
     SELECT 
@@ -122,14 +122,17 @@ router.post('/', authenticateToken, requireRole('customer'), (req, res) => {
     return res.status(400).json({ error: 'item_id, glaze_id, quantity, and needed_by date are required.' });
   }
 
+  const itemId = String(item_id).trim();
+  const glazeId = String(glaze_id).trim();
+
   // 1. Verify item exists
-  const item = db.prepare('SELECT id FROM pottery_items WHERE id = ?').get(item_id);
+  const item = db.prepare('SELECT id FROM pottery_items WHERE id = ?').get(itemId);
   if (!item) {
     return res.status(400).json({ error: 'Selected pottery item is invalid or not in catalog.' });
   }
 
   // 2. Verify glaze exists
-  const glaze = db.prepare('SELECT id FROM pottery_glazes WHERE id = ?').get(glaze_id);
+  const glaze = db.prepare('SELECT id FROM pottery_glazes WHERE id = ?').get(glazeId);
   if (!glaze) {
     return res.status(400).json({ error: 'Selected pottery glaze is invalid or not in catalog.' });
   }
@@ -160,8 +163,8 @@ router.post('/', authenticateToken, requireRole('customer'), (req, res) => {
 
   const result = insertStmt.run(
     req.user.id,
-    item_id,
-    glaze_id,
+    itemId,
+    glazeId,
     parsedQty,
     needed_by,
     notes ? notes.trim() : null
@@ -200,16 +203,18 @@ router.put('/:id', authenticateToken, requireRole('customer'), (req, res) => {
 
   let targetItemId = request.item_id;
   if (item_id !== undefined) {
-    const item = db.prepare('SELECT id FROM pottery_items WHERE id = ?').get(item_id);
+    const itemId = String(item_id).trim();
+    const item = db.prepare('SELECT id FROM pottery_items WHERE id = ?').get(itemId);
     if (!item) return res.status(400).json({ error: 'Selected pottery item is invalid.' });
-    targetItemId = item_id;
+    targetItemId = itemId;
   }
 
   let targetGlazeId = request.glaze_id;
   if (glaze_id !== undefined) {
-    const glaze = db.prepare('SELECT id FROM pottery_glazes WHERE id = ?').get(glaze_id);
+    const glazeId = String(glaze_id).trim();
+    const glaze = db.prepare('SELECT id FROM pottery_glazes WHERE id = ?').get(glazeId);
     if (!glaze) return res.status(400).json({ error: 'Selected pottery glaze is invalid.' });
-    targetGlazeId = glaze_id;
+    targetGlazeId = glazeId;
   }
 
   let targetQuantity = request.quantity;
@@ -288,7 +293,7 @@ router.put('/:id/cancel', authenticateToken, requireRole('customer'), (req, res)
   res.json({ message: 'Pottery request cancelled successfully.', request: updatedRequest });
 });
 
-// PUT /api/pottery/:id/accept - Studio accepts request (Admin only)
+// PUT /api/pottery/:id/accept - Studio accepts request (Admin/Studio only)
 router.put('/:id/accept', authenticateToken, requireRole('admin'), (req, res) => {
   const requestId = parseInt(req.params.id, 10);
   if (isNaN(requestId)) {
@@ -314,7 +319,7 @@ router.put('/:id/accept', authenticateToken, requireRole('admin'), (req, res) =>
   res.json({ message: 'Pottery request accepted.', request: updatedRequest });
 });
 
-// PUT /api/pottery/:id/decline - Studio declines request (Admin only)
+// PUT /api/pottery/:id/decline - Studio declines request (Admin/Studio only)
 router.put('/:id/decline', authenticateToken, requireRole('admin'), (req, res) => {
   const requestId = parseInt(req.params.id, 10);
   if (isNaN(requestId)) {

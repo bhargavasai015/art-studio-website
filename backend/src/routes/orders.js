@@ -5,7 +5,7 @@ import { authenticateToken, requireRole } from '../middleware/auth.js';
 const router = express.Router();
 
 // GET /api/orders - List orders
-// Customer: only what they own. Admin: all orders.
+// Customer: only what they own. Admin/Studio: all orders.
 router.get('/', authenticateToken, (req, res) => {
   let query = `
     SELECT 
@@ -82,14 +82,15 @@ router.get('/:id', authenticateToken, (req, res) => {
 });
 
 // POST /api/orders - Customer purchases an available painting
-// RBAC: Customer only (Admin: No -> 403)
+// RBAC: Customer only (Admin/Studio: No -> 403)
 router.post('/', authenticateToken, requireRole('customer'), (req, res) => {
   const { painting_id } = req.body;
 
-  const paintingId = parseInt(painting_id, 10);
-  if (isNaN(paintingId)) {
+  if (!painting_id) {
     return res.status(400).json({ error: 'A valid painting_id is required.' });
   }
+
+  const paintingId = String(painting_id).trim();
 
   try {
     const order = runInTransaction(() => {

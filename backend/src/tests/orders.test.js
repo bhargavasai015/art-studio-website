@@ -10,18 +10,18 @@ describe('Painting Purchases & Orders Tests', () => {
   });
 
   test('Customer can purchase an available painting', async () => {
-    // Painting #2 is available ($420.00)
+    // Painting 'p-002' is available (Warli Village Scene - ₹1800)
     const res = await request
       .post('/api/orders')
       .set('Authorization', `Bearer ${tokens.customer1Token}`)
-      .send({ painting_id: 2 })
+      .send({ painting_id: 'p-002' })
       .expect(201);
 
     assert.equal(res.body.order.status, 'placed');
-    assert.equal(res.body.order.price_paid, 420.0);
+    assert.equal(res.body.order.price_paid, 1800.0);
 
     // Verify painting status is now 'sold'
-    const paintingRes = await request.get('/api/paintings/2').expect(200);
+    const paintingRes = await request.get('/api/paintings/p-002').expect(200);
     assert.equal(paintingRes.body.painting.status, 'sold');
   });
 
@@ -29,16 +29,16 @@ describe('Painting Purchases & Orders Tests', () => {
     await request
       .post('/api/orders')
       .set('Authorization', `Bearer ${tokens.adminToken}`)
-      .send({ painting_id: 3 })
+      .send({ painting_id: 'p-003' })
       .expect(403);
   });
 
   test('Purchasing an already sold painting returns 409 Conflict', async () => {
-    // Painting #2 was just bought in test above
+    // Painting 'p-002' was just bought in test above
     const res = await request
       .post('/api/orders')
       .set('Authorization', `Bearer ${tokens.customer2Token}`)
-      .send({ painting_id: 2 })
+      .send({ painting_id: 'p-002' })
       .expect(409);
 
     assert.match(res.body.error, /already been purchased|just been purchased/i);
@@ -51,7 +51,6 @@ describe('Painting Purchases & Orders Tests', () => {
       .expect(200);
 
     assert.ok(Array.isArray(res.body.orders));
-    // Customer 2 owns 0 orders right now
     for (const order of res.body.orders) {
       assert.equal(order.customer_id, tokens.customer2User.id);
     }
@@ -78,7 +77,7 @@ describe('Painting Purchases & Orders Tests', () => {
   });
 
   test('Customer can cancel their own order and return painting to available', async () => {
-    // Order #1 is customer 1's seeded order for painting #8
+    // Order #1 is customer 1's seeded order for painting 'p-004'
     const res = await request
       .put('/api/orders/1/cancel')
       .set('Authorization', `Bearer ${tokens.customer1Token}`)
@@ -86,8 +85,8 @@ describe('Painting Purchases & Orders Tests', () => {
 
     assert.equal(res.body.order.status, 'cancelled');
 
-    // Verify painting #8 is now available again!
-    const paintingRes = await request.get('/api/paintings/8').expect(200);
+    // Verify painting 'p-004' is now available again!
+    const paintingRes = await request.get('/api/paintings/p-004').expect(200);
     assert.equal(paintingRes.body.painting.status, 'available');
   });
 

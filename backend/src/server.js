@@ -19,6 +19,12 @@ export const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
+// Serve static images directory
+const imagesDir = path.resolve(__dirname, '../public/images');
+if (fs.existsSync(imagesDir)) {
+  app.use('/images', express.static(imagesDir));
+}
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/paintings', paintingsRoutes);
@@ -28,7 +34,7 @@ app.use('/api/pottery', potteryRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', currency: 'INR', timestamp: new Date().toISOString() });
 });
 
 // 404 Handler for undefined API routes
@@ -41,7 +47,7 @@ const frontendDist = path.resolve(__dirname, '../../frontend/dist');
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
   app.get('*', (req, res, next) => {
-    if (req.originalUrl.startsWith('/api')) return next();
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/images')) return next();
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 }

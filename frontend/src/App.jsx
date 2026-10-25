@@ -155,8 +155,8 @@ function AppContent() {
                 <p><strong>Customer:</strong> customer@example.com</p>
                 <p><strong>Password:</strong> CustomerPassword123!</p>
                 <div style={{ height: '0.5rem' }} />
-                <p><strong>Admin:</strong> admin@artstudio.com</p>
-                <p><strong>Password:</strong> AdminPassword123!</p>
+                <p><strong>Studio / Admin:</strong> studio@artstudio.in</p>
+                <p><strong>Password:</strong> Studio@123</p>
               </div>
             </div>
           </div>

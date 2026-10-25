@@ -1,6 +1,6 @@
 # Design Decisions & Architecture — GDGC Art Studio Website
 
-This document provides concise answers to the four core design questions required by the GDGC Art Studio assignment brief.
+This document provides concise answers to the four core design questions required by the GDGC Art Studio assignment brief, reflecting the official **`seedData.zip`** dataset and **Indian Rupee (₹ / INR)** currency.
 
 ---
 
@@ -9,12 +9,15 @@ This document provides concise answers to the four core design questions require
 The application implements a stateless **JSON Web Token (JWT)** authentication architecture with **bcryptjs** (10 salt rounds) for cryptographic password hashing.
 
 1. **Role Division**:
-   - **`customer`**: Can browse paintings, purchase available paintings, book wall painting dates, submit custom pottery requests, and view/cancel/edit only their own records.
-   - **`admin` (Studio Lead)**: Can browse paintings, add new paintings, edit available paintings, view all customer orders, confirm/decline wall bookings, and accept/decline custom pottery commissions. Admin accounts are barred from placing customer orders or booking murals (`403 Forbidden`).
+   - **`customer`**: Can browse paintings, purchase available paintings in INR (₹), book wall painting dates, submit custom pottery requests, and view/cancel/edit only their own records.
+   - **`studio` / `admin` (Studio Lead)**: Can browse paintings, add new paintings, edit available paintings, view all customer orders, confirm/decline wall bookings, and accept/decline custom pottery commissions. The studio account is barred from placing customer orders or booking murals (`403 Forbidden`).
 
 2. **Secure Provisioning & RBAC Enforcement**:
-   - The studio admin account is provisioned exclusively through backend initialization/seeding (`admin@artstudio.com`).
-   - Public user registration is restricted to creating `customer` accounts. The backend strictly hardcodes or sanitizes `role: 'customer'`, ignoring any client-provided role fields to prevent privilege escalation.
+   - The studio lead account is provisioned directly from `seed.json`:
+     - **Email:** `studio@artstudio.in`
+     - **Password:** `Studio@123`
+     - **Role:** `studio`
+   - Public user registration is restricted to creating `customer` accounts. The backend strictly hardcodes `role: 'customer'`, ignoring any client-provided role fields to prevent privilege escalation.
    - Every protected route enforces role checks through backend middleware:
      - Unauthenticated requests return **HTTP 401 Unauthorized**.
      - Authenticated requests with the incorrect role return **HTTP 403 Forbidden**.
@@ -27,7 +30,7 @@ The application implements a stateless **JSON Web Token (JWT)** authentication a
 We chose **SQLite** utilizing Node.js's native **`node:sqlite` (`DatabaseSync`)**.
 
 1. **Native Portability & Zero-Dependency Execution**:
-   - `node:sqlite` is built directly into modern Node.js runtimes. It eliminates the need for native C++ compilation, `node-gyp`, and platform-dependent prebuilt binary downloads, allowing any developer or evaluator to run the application cleanly on any machine without toolchain conflicts.
+   - `node:sqlite` is built directly into modern Node.js standard library. It eliminates the need for native C++ compilation, `node-gyp`, and platform-dependent prebuilt binary downloads, allowing any developer or evaluator to run the application cleanly on any machine without toolchain conflicts.
 
 2. **Strict ACID Compliance & Real Transactions**:
    - Art inventory and reservation scheduling require absolute data consistency. SQLite provides real transactions (`BEGIN IMMEDIATE`, `COMMIT`, `ROLLBACK`) that guarantee atomic state transitions when purchasing one-of-a-kind art pieces and reserving calendar dates.
@@ -47,7 +50,7 @@ We employ a defense-in-depth concurrency model combining **atomic conditional SQ
 #### A. Preventing Duplicate Painting Purchases
 - **The Challenge**: Each painting is one-of-a-kind and must be purchased exactly once.
 - **The Solution**:
-  1. The purchase endpoint wraps the checkout operation in a `BEGIN IMMEDIATE` transaction, immediately obtaining SQLite's reserved write lock.
+  1. The purchase endpoint wraps checkout in a `BEGIN IMMEDIATE` transaction, immediately obtaining SQLite's reserved write lock.
   2. The update statement executes an atomic check-and-set:
      ```sql
      UPDATE paintings
@@ -75,21 +78,22 @@ We employ a defense-in-depth concurrency model combining **atomic conditional SQ
 ### 4. What did you finish, what did you leave out, and what would you do next?
 
 #### What We Finished (100% of Core Requirements):
-- **Painting Sales**: Public gallery browsing with filters (all, available, sold); admin painting creation and editing (restricted to `available` artworks); atomic one-of-a-kind purchasing; customer order cancellation with immediate restoration of painting availability.
-- **Wall-Painting Bookings**: Strict date boundary validation (7 to 90 days in the future); wall size boundary checks (10 to 500 sq ft); address capture; automatic price calculation from seed rate ($15.00/sq ft); duplicate date prevention; admin confirmation and declining; customer cancellation allowed strictly up to 3 days before the booking date.
-- **Custom Pottery Requests**: Catalog selection using seeded item silhouettes and glaze formulations; quantity limits (1 to 12 pieces); needed-by date validation (≥ 14 days away); admin accept and decline workflows; customer editing and cancellation restricted to `requested` status.
-- **Security & RBAC**: Strict separation of customer and admin privileges; JWT sessions; HTTP 401 for unauthenticated requests; HTTP 403 for wrong-role requests; HTTP 404 when querying another user's records.
-- **Interface & UX**: Comprehensive loading states, empty states, and error alerts on every screen; clear feedback when actions are refused; pre-filled 1-click test credentials for easy evaluation.
+- **Full Seed Dataset Integration**: Integrated all 12 authentic Indian folk paintings from `seedData.zip` (Madhubani, Warli, Tanjore, Pattachitra, Kalamkari, Gond, Cheriyal, Rajasthani Miniature, Pichwai, Nirmal, Kerala Mural, and Varanasi Ghats), with high-resolution imagery and Indian Rupee (₹) pricing ranging from ₹1,800 to ₹25,000.
+- **Painting Sales**: Public gallery browsing with filters; admin/studio creation and editing (restricted to `available` artworks); atomic one-of-a-kind purchasing; customer order cancellation with immediate restoration of painting availability.
+- **Wall-Painting Bookings**: Strict date boundary validation (7 to 90 days in the future); wall size boundary checks (10 to 500 sq ft); address capture; automatic price calculation from seed rate (**₹150/sq ft**); duplicate date prevention; studio confirmation and declining; customer cancellation allowed strictly up to 3 days before the booking date.
+- **Custom Pottery Requests**: Catalog selection using the 5 seeded vessel silhouettes (Kulhad, Surahi, Matka, Diya set, Gamla) and 6 traditional glazes (Kumkum Red, Haldi Yellow, Mehendi Green, Indigo Blue, Sandalwood Beige, Charcoal Black); quantity limits (1 to 12 pieces); needed-by date validation (≥ 14 days away); studio accept/decline; customer editing and cancellation restricted to `requested` status.
+- **Security & RBAC**: Strict separation of customer and studio/admin privileges; JWT sessions; HTTP 401 for unauthenticated requests; HTTP 403 for wrong-role requests; HTTP 404 when querying another user's records.
+- **Interface & UX**: Comprehensive loading states, empty states, and error alerts on every screen; responsive card layout accommodating extra-long titles and descriptions (e.g., painting #12); pre-filled 1-click test credentials for easy evaluation.
 - **Automated Test Suite**: 46 automated integration and concurrency tests passing with a 100% success rate.
 
 #### What We Left Out (Explicitly Out of Scope per Brief Section 06):
-- Real payment processing (payment gateways like Stripe or PayPal).
+- Real payment processing (payment gateways like Razorpay/Stripe).
 - Social login, password resets, email verification, and email/SMS transactional notifications.
-- Multipart image file uploads (curated Unsplash URLs are used for art assets).
+- Multipart image file uploads (seed image assets are served from `/images`).
 - Production cloud deployment, Docker containers, and CI/CD pipelines.
 
 #### What We Would Do Next (Future Enhancements):
 1. **Real-time Push Notifications**: Implement WebSockets or Server-Sent Events (SSE) so that when an artwork is sold or a date is booked, all connected clients immediately update without page refreshes.
-2. **Direct Image Uploads**: Add presigned URL uploads directly to AWS S3 or Cloudinary with automated thumbnail generation.
-3. **Interactive Visual Mural Previewer**: Integrate a canvas-based room visualizer where customers can upload a photo of their living room wall and preview mural concepts at scale.
+2. **Direct Image Uploads**: Add presigned URL uploads directly to cloud storage with automated thumbnail generation.
+3. **Interactive Visual Mural Previewer**: Integrate a canvas-based room visualizer where customers can preview mural concepts on an uploaded room photo.
 4. **Automated Calendar Reminders**: Send calendar invite files (.ics) and reminder alerts 5 days prior to scheduled wall painting sessions.

@@ -247,7 +247,7 @@ export default function CustomerDashboard({ initialTab = 'orders', onNavigate })
                               <StatusBadge status={order.status} />
                             </div>
                             <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-                              Artist: {order.painting_artist} • Paid: <strong>${order.price_paid.toFixed(2)}</strong>
+                              Artist: {order.painting_artist} • Paid: <strong>₹{Number(order.price_paid).toLocaleString('en-IN')}</strong>
                             </p>
                             <p style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', marginTop: '0.25rem' }}>
                               Order #{order.id} • Date: {order.created_at}
@@ -308,7 +308,7 @@ export default function CustomerDashboard({ initialTab = 'orders', onNavigate })
                             📍 {booking.address}
                           </p>
                           <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-                            Surface: <strong>{booking.wall_size} sq ft</strong> • Rate: ${booking.rate_per_sqft}/sq ft • Total: <strong style={{ color: 'var(--color-primary)' }}>${booking.total_price.toFixed(2)}</strong>
+                            Surface: <strong>{booking.wall_size} sq ft</strong> • Rate: ₹{booking.rate_per_sqft}/sq ft • Total: <strong style={{ color: 'var(--color-primary)' }}>₹{Number(booking.total_price).toLocaleString('en-IN')}</strong>
                           </p>
                         </div>
 
